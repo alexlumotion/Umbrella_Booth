@@ -210,8 +210,9 @@ MonoBehaviour:
   spacing: 715
   depth: 0.84
   maxYRotation: 28
-  tweenDuration: 1
+  tweenDuration: 1.2
   tweenEase: 9
+  flipDuration: 0.5
   dimNeighbours: 0
   neighbourAlpha: 0.6
   neighbourScale: 0.9
