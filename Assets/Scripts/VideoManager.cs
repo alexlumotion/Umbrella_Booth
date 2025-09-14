@@ -16,6 +16,8 @@ public class VideoManager : MonoBehaviour
 
     public TransitionClient transitionClient;
 
+    public VideoPreRollPlayer videoPreRollPlayer;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -37,14 +39,13 @@ public class VideoManager : MonoBehaviour
 
     public void Complete()
     {
-        Debug.Log("Complete");
-        //FadeIn();
-        videoPlayer.Play();
+        //Debug.Log("Complete");
+        videoPreRollPlayer.PlaySmoothly();
     }
 
     void OnVideoEnded(VideoPlayer vp)
     {
-        Debug.Log("OnVideoEnded");
+        //Debug.Log("OnVideoEnded");
         //vp.frame = 0;
         transitionClient.Trigger();
     }
