@@ -8,16 +8,15 @@ public class WorldSpaceCarouselManager : MonoBehaviour
     public RectTransform[] cards;
 
     [Header("Layout")]
-    public float spacing = 1.65f;        // X зсув між сусідами (у world units)
-    public float depth = 0.84f;          // Z зсув сусідів назад
-    public float maxYRotation = 28f;     // кут "закриття" (фліпу)
+    public float spacing = 1.65f;
+    public float depth = 0.84f;
+    public float maxYRotation = 28f;
 
     [Header("Tween (move/scale)")]
     public float tweenDuration = 0.4f;
     public Ease tweenEase = Ease.OutCubic;
 
     [Header("Flip (Y-rotation)")]
-    [Tooltip("Тривалість фліп-анімації (закриття/відкриття)")]
     public float flipDuration = 0.5f;
 
     [Header("Optional Fade/Scale")]
@@ -26,7 +25,6 @@ public class WorldSpaceCarouselManager : MonoBehaviour
     public float neighbourScale = 0.9f;
 
     [Header("Visible Range")]
-    [Tooltip("Скільки карток видно з кожного боку від центру (1 = центр+ліва+права)")]
     public int sideCount = 1;
 
     [Header("Start index")]
@@ -38,7 +36,6 @@ public class WorldSpaceCarouselManager : MonoBehaviour
     void Start()
     {
         currentIndex = Mathf.Clamp(startIndex, 0, cards.Length - 1);
-        // Початкове розміщення: усі видимі Y=0, невидимі — snap і вимкнені
         LayoutForIndex(currentIndex, instant: true, forceYZeroForVisible: true);
     }
 
@@ -54,14 +51,13 @@ public class WorldSpaceCarouselManager : MonoBehaviour
         RunFlipSequence(next: false);
     }
 
-    // ---------------- Core sequence: Flip -> Reindex (prepare invisibles) -> Move+Unflip ----------------
     private void RunFlipSequence(bool next)
     {
         isAnimating = true;
 
-        float closingAngle = next ? -maxYRotation : +maxYRotation;  // ← додали
+        float closingAngle = next ? -maxYRotation : +maxYRotation;
 
-        // 1) Закриття
+        // 1) закриваємо видимі
         var visibleNow = GetVisibleSet(currentIndex);
         foreach (var rt in visibleNow)
         {
@@ -70,63 +66,109 @@ public class WorldSpaceCarouselManager : MonoBehaviour
             rt.DOLocalRotate(new Vector3(0f, closingAngle, 0f), flipDuration).SetEase(Ease.OutCubic);
         }
 
-        // 2) Після закриття
+        // 2) після закриття: зсув індексу + підготовка
         DOVirtual.DelayedCall(flipDuration, () =>
         {
+            // визначаємо множину "колишніх видимих"
+            var prevVisibleSet = new HashSet<RectTransform>(visibleNow); // *****
+
             currentIndex = next
                 ? (currentIndex + 1) % cards.Length
                 : (currentIndex - 1 + cards.Length) % cards.Length;
 
-            // Тут теж передаємо closingAngle у LayoutForIndex, щоб видимі залишились у правильному знакові
-            LayoutForIndex(currentIndex, instant: true, forceYZeroForVisible: false,
-                        keepClosedRotationForVisible: true, prepareInvisibleOnly: true,
-                        customClosedAngle: closingAngle);
+            // готуємо тільки НEвидимі, але НЕ чіпаємо ті, що були видимі до цього (щоб вони могли красиво виїхати)  // *****
+            LayoutForIndex(currentIndex,
+                           instant: true,
+                           forceYZeroForVisible: false,
+                           keepClosedRotationForVisible: true,
+                           prepareInvisibleOnly: true,
+                           customClosedAngle: closingAngle,
+                           excludeFromSnap: prevVisibleSet); // *****
 
-            // 3) Відкриття: видимі одночасно рухаються у свої НОВІ позиції + крутяться назад до 0°
-            var visibleAfter = GetVisibleSet(currentIndex);
-            foreach (var rt in visibleAfter)
+            // 3) відкриття: анімуємо видимі та "аутгоїнг" (які щойно стали невидимими)
+            var visibleAfter = new HashSet<RectTransform>(GetVisibleSet(currentIndex));
+
+            var toDisableLater = new List<RectTransform>(); // вимкнемо після руху
+
+            for (int i = 0; i < cards.Length; i++)
             {
+                RectTransform rt = cards[i];
                 if (!rt) continue;
-                rt.DOKill();
 
-                // Обчислити нові параметри (позицію/масштаб/альфу) для ЦЬОГО rt при currentIndex
+                // параметри для нового індексу
                 float off;
                 Vector3 targetPos, targetScale;
                 float targetAlpha;
                 ComputeParamsFor(rt, currentIndex, out off, out targetPos, out targetScale, out targetAlpha);
 
-                // Рух у нову позицію (позиція змінюється тут, а не під час LayoutForIndex)
-                rt.DOLocalMove(targetPos, tweenDuration).SetEase(tweenEase);
-                rt.DOScale(targetScale, tweenDuration).SetEase(tweenEase);
+                bool willBeVisible = Mathf.Abs(off) <= sideCount + 0.001f;
+                bool wasVisible = prevVisibleSet.Contains(rt); // *****
 
-                // Обертання назад до 0
-                rt.DOLocalRotate(Vector3.zero, flipDuration).SetEase(Ease.OutCubic);
+                rt.DOKill();
 
-                if (dimNeighbours)
+                if (willBeVisible)
                 {
-                    var cg = rt.GetComponent<CanvasGroup>();
-                    if (cg == null) cg = rt.gameObject.AddComponent<CanvasGroup>();
-                    cg.DOFade(targetAlpha, tweenDuration).SetEase(tweenEase);
-                    bool isCenter = Mathf.Abs(off) < 0.01f;
-                    cg.interactable = isCenter;
-                    cg.blocksRaycasts = isCenter;
+                    // звичайні видимі: їдуть у нову позицію + розкриваються до 0
+                    rt.DOLocalMove(targetPos, tweenDuration).SetEase(tweenEase);
+                    rt.DOScale(targetScale, tweenDuration).SetEase(tweenEase);
+                    rt.DOLocalRotate(Vector3.zero, flipDuration).SetEase(Ease.OutCubic);
+
+                    if (dimNeighbours)
+                    {
+                        var cg = rt.GetComponent<CanvasGroup>() ?? rt.gameObject.AddComponent<CanvasGroup>();
+                        cg.DOFade(targetAlpha, tweenDuration).SetEase(tweenEase);
+                        bool isCenter = Mathf.Abs(off) < 0.01f;
+                        cg.interactable = isCenter;
+                        cg.blocksRaycasts = isCenter;
+                    }
+                }
+                else
+                {
+                    // ТІЛЬКИ якщо вона була видимою щойно (а зараз стала невидимою) — даємо їй виїхати tween'ом  // *****
+                    if (wasVisible)
+                    {
+                        rt.DOLocalMove(targetPos, tweenDuration).SetEase(tweenEase);
+                        rt.DOScale(targetScale, tweenDuration).SetEase(tweenEase);
+                        rt.DOLocalRotate(Vector3.zero, flipDuration).SetEase(Ease.OutCubic);
+
+                        if (dimNeighbours)
+                        {
+                            var cg = rt.GetComponent<CanvasGroup>() ?? rt.gameObject.AddComponent<CanvasGroup>();
+                            cg.DOFade(targetAlpha, tweenDuration).SetEase(tweenEase);
+                            cg.interactable = false;
+                            cg.blocksRaycasts = false;
+                        }
+
+                        toDisableLater.Add(rt); // вимкнемо ПІСЛЯ руху
+                    }
+                    else
+                    {
+                        // ті, що й до того були невидимі, уже заснейплені та можуть лишатись вимкненими
+                        // нічого не робимо
+                    }
                 }
             }
 
-            // Кінець послідовності
-            DOVirtual.DelayedCall(Mathf.Max(flipDuration, tweenDuration), () => { isAnimating = false; });
+            // 4) вимикаємо лише ті, що щойно виїхали за межі
+            DOVirtual.DelayedCall(Mathf.Max(flipDuration, tweenDuration), () =>
+            {
+                foreach (var rt in toDisableLater)
+                {
+                    if (rt) rt.gameObject.SetActive(false);
+                }
+                isAnimating = false;
+            });
         });
     }
 
-    // ---------------- Layout helper ----------------
-    // instant=true: миттєво ставимо трансформи
-    // forceYZeroForVisible: у стабільному стані видимим ставимо Y=0
-    // keepClosedRotationForVisible: якщо true — видимим залишаємо Y=-max (перед відкриттям)
-    // prepareInvisibleOnly: якщо true — видимі НЕ чіпаємо (залишаються на старих позиціях для красивого руху на фазі відкриття)
+    // instant=true: миттєва розкладка
+    // forceYZeroForVisible: видимим ставимо Y=0
+    // keepClosedRotationForVisible: якщо true — видимим залишаємо Y=customClosedAngle (для старту відкриття)
+    // prepareInvisibleOnly: якщо true — обробляємо ЛИШЕ невидимі
+    // excludeFromSnap: НЕ чіпати ці карти (залишити як є), навіть якщо вони стали невидимими зараз  // *****
     private void LayoutForIndex(int index, bool instant, bool forceYZeroForVisible,
-                            bool keepClosedRotationForVisible = false,
-                            bool prepareInvisibleOnly = false,
-                            float customClosedAngle = 0f)
+                                bool keepClosedRotationForVisible = false, bool prepareInvisibleOnly = false,
+                                float customClosedAngle = 0f, HashSet<RectTransform> excludeFromSnap = null) // *****
     {
         int n = cards.Length;
         for (int i = 0; i < n; i++)
@@ -134,7 +176,6 @@ public class WorldSpaceCarouselManager : MonoBehaviour
             RectTransform card = cards[i];
             if (!card) continue;
 
-            // Обчислюємо offset у кільці
             int rawOffset = i - index;
             if (rawOffset > n / 2) rawOffset -= n;
             if (rawOffset < -n / 2) rawOffset += n;
@@ -142,11 +183,9 @@ public class WorldSpaceCarouselManager : MonoBehaviour
 
             bool isVisible = Mathf.Abs(offset) <= sideCount + 0.001f;
 
-            // Параметри steady-state (позиція/масштаб/альфа)
             Vector3 pos = new Vector3(offset * spacing, 0f, -Mathf.Abs(offset) * depth);
             Vector3 scale = Vector3.one;
             float alpha = 1f;
-
             if (dimNeighbours && Mathf.Abs(offset) > 0.01f && isVisible)
             {
                 scale = Vector3.one * neighbourScale;
@@ -155,20 +194,27 @@ public class WorldSpaceCarouselManager : MonoBehaviour
 
             if (!isVisible)
             {
-                // Невидимі: завжди snap у правильне місце і вимкнути, щоб не мигтіли
-                if (instant)
+                // якщо картка була видима щойно — НЕ чіпаємо її зараз (вона виїде tween'ом)  // *****
+                if (prepareInvisibleOnly && excludeFromSnap != null && excludeFromSnap.Contains(card))
                 {
-                    card.localPosition = pos;
-                    card.localScale = scale;
-                    card.localRotation = Quaternion.identity; // steady 0
+                    // leave as is
                 }
-                if (card.gameObject.activeSelf) card.gameObject.SetActive(false);
+                else
+                {
+                    if (instant)
+                    {
+                        card.localPosition = pos;
+                        card.localScale = scale;
+                        card.localRotation = Quaternion.identity;
+                    }
+                    // ця категорія може бути вимкнена відразу (бо вона не "стара крайня")
+                    if (card.gameObject.activeSelf) card.gameObject.SetActive(false);
+                }
 
-                var cgHidden = card.GetComponent<CanvasGroup>();
                 if (dimNeighbours)
                 {
-                    if (cgHidden == null) cgHidden = card.gameObject.AddComponent<CanvasGroup>();
-                    cgHidden.alpha = alpha;
+                    var cgHidden = card.GetComponent<CanvasGroup>() ?? card.gameObject.AddComponent<CanvasGroup>();
+                    cgHidden.alpha = isVisible ? alpha : cgHidden.alpha;
                     cgHidden.interactable = false;
                     cgHidden.blocksRaycasts = false;
                 }
@@ -179,22 +225,14 @@ public class WorldSpaceCarouselManager : MonoBehaviour
                 if (!card.gameObject.activeSelf) card.gameObject.SetActive(true);
             }
 
-            // Якщо готуємо лише невидимі — видимі не рухаємо тут (щоб вони плавно ЇХАЛИ під час відкриття)
             if (prepareInvisibleOnly) continue;
 
-            // Видимі: steady rotation = 0, але якщо старт відкриття — залишаємо -max
-             Quaternion targetRot = Quaternion.identity;
-            if (keepClosedRotationForVisible)
-                targetRot = Quaternion.Euler(0f, customClosedAngle, 0f);
-            if (forceYZeroForVisible)
-                targetRot = Quaternion.identity;
+            Quaternion targetRot = Quaternion.identity;
+            if (keepClosedRotationForVisible) targetRot = Quaternion.Euler(0f, customClosedAngle, 0f);
+            if (forceYZeroForVisible)         targetRot = Quaternion.identity;
 
-            var cg = card.GetComponent<CanvasGroup>();
-            if (dimNeighbours)
-            {
-                if (cg == null) cg = card.gameObject.AddComponent<CanvasGroup>();
-                cg.alpha = alpha;
-            }
+            var cg = dimNeighbours ? (card.GetComponent<CanvasGroup>() ?? card.gameObject.AddComponent<CanvasGroup>()) : null;
+            if (dimNeighbours && cg != null) cg.alpha = alpha;
 
             if (instant)
             {
@@ -220,28 +258,24 @@ public class WorldSpaceCarouselManager : MonoBehaviour
         }
     }
 
-    // Повертає видимі RectTransform для поточного індексу
     private RectTransform[] GetVisibleSet(int index)
     {
         List<RectTransform> list = new List<RectTransform>();
         int n = cards.Length;
         for (int i = 0; i < n; i++)
         {
-            RectTransform rt = cards[i];
+            var rt = cards[i];
             if (!rt) continue;
-
             int rawOffset = i - index;
             if (rawOffset > n / 2) rawOffset -= n;
             if (rawOffset < -n / 2) rawOffset += n;
             float off = rawOffset;
-
             if (Mathf.Abs(off) <= sideCount + 0.001f)
                 list.Add(rt);
         }
         return list.ToArray();
     }
 
-    // Обчислює target-параметри для конкретної картки rt при даному index (для фази "відкриття")
     private void ComputeParamsFor(RectTransform rt, int index,
                                   out float offset, out Vector3 targetPos, out Vector3 targetScale, out float targetAlpha)
     {
