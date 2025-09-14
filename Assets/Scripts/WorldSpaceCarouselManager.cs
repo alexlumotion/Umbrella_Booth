@@ -1,19 +1,18 @@
 using UnityEngine;
 using DG.Tweening;
 using System.Collections.Generic;
+using UnityEngine.Events;
 
 public class WorldSpaceCarouselManager : MonoBehaviour
 {
     [Header("Cards")]
     public RectTransform[] cards;
 
-    [Header("Vertical offset")]
-    public float yOffset = -150f;
-
     [Header("Layout")]
-    public float spacing = 1.65f;     // X-відстань між слотами (world units)
-    public float depth = 0.84f;       // Z-відступ для нецентрових
-    public float maxYRotation = 28f;  // |кут| для нецентрових
+    public float spacing = 1.65f;
+    public float depth = 0.84f;
+    public float maxYRotation = 28f;
+    public float yOffset = -150f;
 
     [Header("Tween")]
     public float tweenDuration = 0.4f;
@@ -21,23 +20,53 @@ public class WorldSpaceCarouselManager : MonoBehaviour
 
     [Header("Neighbours styling (optional)")]
     public bool dimNeighbours = false;
-    [Range(0,1)] public float neighbourAlpha = 0.6f;
+    [Range(0, 1)] public float neighbourAlpha = 0.6f;
     public float neighbourScale = 0.9f;
 
     [Header("Visible band")]
-    [Tooltip("Скільки карток видно ліворуч/праворуч від центру (1 = трійка).")]
     public int sideCount = 1;
 
     [Header("Start")]
     public int startIndex = 0;
 
-    private int currentIndex;
+    // ---------- State ----------
+    public int CurrentIndex { get; private set; }
+    public RectTransform CurrentCenterCard
+        => (cards != null && cards.Length > 0 && CurrentIndex >= 0 && CurrentIndex < cards.Length)
+           ? cards[CurrentIndex] : null;
+
+    public RectTransform GetCardAtOffset(int offset)
+    {
+        if (cards == null || cards.Length == 0) return null;
+        int n = cards.Length;
+        int idx = (CurrentIndex + offset) % n;
+        if (idx < 0) idx += n;
+        return cards[idx];
+    }
+
+    // ---------- Events ----------
+    [System.Serializable] public class CenterChangedEvent : UnityEvent<RectTransform, int> { }
+    [System.Serializable] public class CenterWillChangeEvent : UnityEvent<RectTransform, int, int> { } // nextCard, nextIndex, dir
+
+    [Header("UnityEvents (Inspector)")]
+    public CenterWillChangeEvent OnCenterWillChange;
+    public CenterChangedEvent OnCenterChanged;
+
+    // C# events
+    public event System.Action<RectTransform, int, int> CenterWillChange; // (nextCard,nextIndex,dir)
+    public event System.Action<RectTransform, int> CenterChanged; // (centerCard,index)
+
     private bool isAnimating;
 
     void Start()
     {
-        currentIndex = Mathf.Clamp(startIndex, 0, cards.Length - 1);
-        LayoutStatic(currentIndex);
+        CurrentIndex = Mathf.Clamp(startIndex, 0, (cards?.Length ?? 1) - 1);
+        LayoutStatic(CurrentIndex);
+
+        // повідомляємо про стартовий стан один раз
+        var center = CurrentCenterCard;
+        OnCenterChanged?.Invoke(center, CurrentIndex);
+        CenterChanged?.Invoke(center, CurrentIndex);
     }
 
     public void ShowNext()
@@ -54,26 +83,31 @@ public class WorldSpaceCarouselManager : MonoBehaviour
 
     // ---------------- CORE ----------------
 
-    private void Step(int dir) // dir = +1 (вправо) або -1 (вліво)
+    private void Step(int dir)
     {
         if (cards == null || cards.Length == 0) return;
 
-        isAnimating = true;
         int n = cards.Length;
-        int prevIndex = currentIndex;
-        int nextIndex = (currentIndex + dir + n) % n;
+        int prevIndex = CurrentIndex;
+        int nextIndex = (CurrentIndex + dir + n) % n;
+        var nextCard = cards[nextIndex];
 
-        var wasVisible   = VisibleSet(prevIndex);
-        var willBeVisible= VisibleSet(nextIndex);
+        // подія "перед зміною"
+        OnCenterWillChange?.Invoke(nextCard, nextIndex, dir);
+        CenterWillChange?.Invoke(nextCard, nextIndex, dir);
 
-        var outgoing = new HashSet<RectTransform>(wasVisible);     // були видимі → стануть невидимі
+        isAnimating = true;
+
+        var wasVisible = VisibleSet(prevIndex);
+        var willBeVisible = VisibleSet(nextIndex);
+
+        var outgoing = new HashSet<RectTransform>(wasVisible);
         outgoing.ExceptWith(willBeVisible);
 
-        var incoming = new HashSet<RectTransform>(willBeVisible);  // стануть видимі → раніше були невидимі
+        var incoming = new HashSet<RectTransform>(willBeVisible);
         incoming.ExceptWith(wasVisible);
 
         // --- PRE-POSITION для incoming ---
-        // Ставимо миттєво за межі видимого ряду: preOffset = ±(sideCount+1)
         int preOffset = (dir > 0) ? (sideCount + 1) : -(sideCount + 1);
         foreach (var rt in incoming)
         {
@@ -82,20 +116,20 @@ public class WorldSpaceCarouselManager : MonoBehaviour
 
             Pose pre = ComputePose(preOffset);
             rt.DOKill();
-            rt.localPosition = pre.pos;                      // миттєво
-            rt.localRotation = Quaternion.Euler(pre.euler);  // з правильним знаком кута
-            rt.localScale    = pre.scale;
+            rt.localPosition = pre.pos;
+            rt.localRotation = Quaternion.Euler(pre.euler);
+            rt.localScale = pre.scale;
 
             if (dimNeighbours)
             {
                 var cg = rt.GetComponent<CanvasGroup>() ?? rt.gameObject.AddComponent<CanvasGroup>();
-                cg.alpha = neighbourAlpha;                   // як у сусідів
+                cg.alpha = neighbourAlpha;
                 cg.interactable = false;
                 cg.blocksRaycasts = false;
             }
         }
 
-        // Анімуємо всіх, хто був або стане видимим (щоб синхронно їхали)
+        // Анімуємо всіх, хто був або стане видимим
         var toAnimate = new HashSet<RectTransform>(wasVisible);
         toAnimate.UnionWith(willBeVisible);
 
@@ -124,10 +158,10 @@ public class WorldSpaceCarouselManager : MonoBehaviour
             }
         }
 
-        // Після твіну: вимкнути тих, хто став невидимим; зафіксувати позу видимих
+        // Після твіну
         DOVirtual.DelayedCall(tweenDuration, () =>
         {
-            currentIndex = nextIndex;
+            CurrentIndex = nextIndex;
 
             foreach (var rt in outgoing)
             {
@@ -135,13 +169,13 @@ public class WorldSpaceCarouselManager : MonoBehaviour
                 int i = System.Array.IndexOf(cards, rt);
                 if (i < 0) continue;
 
-                float offNow = CyclicOffset(i, currentIndex, n);
+                float offNow = CyclicOffset(i, CurrentIndex, n);
                 if (Mathf.Abs(offNow) > sideCount + 0.001f)
                 {
                     Pose p = ComputePose(offNow);
                     rt.localPosition = p.pos;
                     rt.localRotation = Quaternion.Euler(p.euler);
-                    rt.localScale    = p.scale;
+                    rt.localScale = p.scale;
                     rt.gameObject.SetActive(false);
                 }
             }
@@ -152,11 +186,11 @@ public class WorldSpaceCarouselManager : MonoBehaviour
                 int i = System.Array.IndexOf(cards, rt);
                 if (i < 0) continue;
 
-                float off = CyclicOffset(i, currentIndex, n);
+                float off = CyclicOffset(i, CurrentIndex, n);
                 Pose p = ComputePose(off);
                 rt.localPosition = p.pos;
                 rt.localRotation = Quaternion.Euler(p.euler);
-                rt.localScale    = p.scale;
+                rt.localScale = p.scale;
 
                 if (dimNeighbours)
                 {
@@ -169,6 +203,11 @@ public class WorldSpaceCarouselManager : MonoBehaviour
             }
 
             isAnimating = false;
+
+            // подія "після зміни"
+            var center = CurrentCenterCard;
+            OnCenterChanged?.Invoke(center, CurrentIndex);
+            CenterChanged?.Invoke(center, CurrentIndex);
         });
     }
 
@@ -183,7 +222,7 @@ public class WorldSpaceCarouselManager : MonoBehaviour
 
     private void LayoutStatic(int index)
     {
-        int n = cards.Length;
+        int n = cards?.Length ?? 0;
         for (int i = 0; i < n; i++)
         {
             var rt = cards[i];
@@ -199,7 +238,8 @@ public class WorldSpaceCarouselManager : MonoBehaviour
                 if (!rt.gameObject.activeSelf) rt.gameObject.SetActive(true);
                 rt.localPosition = p.pos;
                 rt.localRotation = Quaternion.Euler(p.euler);
-                rt.localScale    = p.scale;
+                rt.localScale = p.scale;
+
                 if (dimNeighbours)
                 {
                     var cg = rt.GetComponent<CanvasGroup>() ?? rt.gameObject.AddComponent<CanvasGroup>();
@@ -213,7 +253,7 @@ public class WorldSpaceCarouselManager : MonoBehaviour
             {
                 rt.localPosition = p.pos;
                 rt.localRotation = Quaternion.Euler(p.euler);
-                rt.localScale    = p.scale;
+                rt.localScale = p.scale;
                 if (rt.gameObject.activeSelf) rt.gameObject.SetActive(false);
             }
         }
@@ -227,16 +267,13 @@ public class WorldSpaceCarouselManager : MonoBehaviour
         return raw;
     }
 
-    // Поза для офсету:
-    // центр: rot Y = 0; ліві: -maxYRotation; праві: +maxYRotation
     private Pose ComputePose(float off)
     {
         Pose p;
-        // X = відстань, Y = yOffset, Z = depth
-        p.pos   = new Vector3(off * spacing, yOffset, -Mathf.Abs(off) * depth);
+        p.pos = new Vector3(off * spacing, yOffset, -Mathf.Abs(off) * depth);
         p.euler = (Mathf.Abs(off) < 0.01f)
-                    ? Vector3.zero
-                    : new Vector3(0f, Mathf.Sign(off) * maxYRotation, 0f);
+            ? Vector3.zero
+            : new Vector3(0f, Mathf.Sign(off) * maxYRotation, 0f);
 
         if (dimNeighbours && Mathf.Abs(off) > 0.01f && Mathf.Abs(off) <= sideCount + 0.001f)
             p.scale = Vector3.one * neighbourScale;
@@ -249,7 +286,7 @@ public class WorldSpaceCarouselManager : MonoBehaviour
     private List<RectTransform> VisibleSet(int center)
     {
         var list = new List<RectTransform>();
-        int n = cards.Length;
+        int n = cards?.Length ?? 0;
         for (int i = 0; i < n; i++)
         {
             var rt = cards[i];

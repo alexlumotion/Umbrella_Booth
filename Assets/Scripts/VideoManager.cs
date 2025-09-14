@@ -1,6 +1,7 @@
 using UnityEngine;
 using DG.Tweening;
 using UnityEngine.Video;
+using UnityEngine.UI;
 
 
 public class VideoManager : MonoBehaviour
@@ -18,11 +19,34 @@ public class VideoManager : MonoBehaviour
 
     public VideoPreRollPlayer videoPreRollPlayer;
 
+    public WorldSpaceCarouselManager worldSpaceCarouselManager;
+
+
+    public Image imgPDF;
+    public Image imgBeforeQR;
+    public Image imgQR;
+
+
     // Start is called before the first frame update
     void Start()
     {
         videoPlayer.loopPointReached += OnVideoEnded;
         videoPlayer.frame = 0;
+
+        worldSpaceCarouselManager.CenterChanged += (centerRt, index) =>
+        {
+            //Debug.Log($"Новий центр: {index} ({centerRt?.name})");
+        };
+        worldSpaceCarouselManager.CenterWillChange += (nextCard, nextIndex, dir) =>
+        {
+            // Debug.Log($"Скоро центр стане {nextIndex} ({nextCard?.name}), dir={dir}");
+            CardHolder ch = nextCard.GetComponent<CardHolder>();
+            videoPlayer.clip = ch.clip;
+            imgPDF.sprite = ch.spritePDF;
+            imgBeforeQR.sprite = ch.spriteBeforeQR;
+            imgQR.sprite = ch.spriteQR;
+        };
+
     }
 
     public bool updateFrame = false;
@@ -36,6 +60,8 @@ public class VideoManager : MonoBehaviour
             videoPlayer.frame = 0;
         }
     }
+
+    void OnCenterChanged() { }
 
     public void Complete()
     {
