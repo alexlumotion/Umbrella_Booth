@@ -23,10 +23,16 @@ public class VideoManager : MonoBehaviour
         videoPlayer.frame = 0;
     }
 
+    public bool updateFrame = false;
+
     // Update is called once per frame
     void Update()
     {
-
+        if (updateFrame)
+        {
+            updateFrame = false;
+            videoPlayer.frame = 0;
+        }
     }
 
     public void Complete()
