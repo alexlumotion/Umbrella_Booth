@@ -8,8 +8,8 @@ public class WorldSpaceCarouselManager : MonoBehaviour
     public RectTransform[] cards;
 
     [Header("Layout")]
-    public float spacing = 1.65f;     // зміщення по X між слотами (world units)
-    public float depth = 0.84f;       // відступ за Z для нецентрових
+    public float spacing = 1.65f;     // X-відстань між слотами (world units)
+    public float depth = 0.84f;       // Z-відступ для нецентрових
     public float maxYRotation = 28f;  // |кут| для нецентрових
 
     [Header("Tween")]
@@ -22,7 +22,7 @@ public class WorldSpaceCarouselManager : MonoBehaviour
     public float neighbourScale = 0.9f;
 
     [Header("Visible band")]
-    [Tooltip("Скільки карток видно ліворуч/праворуч від центру. Для «трійки» став 1.")]
+    [Tooltip("Скільки карток видно ліворуч/праворуч від центру (1 = трійка).")]
     public int sideCount = 1;
 
     [Header("Start")]
@@ -34,7 +34,6 @@ public class WorldSpaceCarouselManager : MonoBehaviour
     void Start()
     {
         currentIndex = Mathf.Clamp(startIndex, 0, cards.Length - 1);
-        // Початкове розміщення: центр Y=0, сусіди Y=±max
         LayoutStatic(currentIndex);
     }
 
@@ -57,88 +56,93 @@ public class WorldSpaceCarouselManager : MonoBehaviour
         if (cards == null || cards.Length == 0) return;
 
         isAnimating = true;
-
         int n = cards.Length;
         int prevIndex = currentIndex;
         int nextIndex = (currentIndex + dir + n) % n;
 
-        // Збираємо множини видимих "до" та "після"
-        var wasVisible = VisibleSet(prevIndex);
-        var willBeVisible = VisibleSet(nextIndex);
+        var wasVisible   = VisibleSet(prevIndex);
+        var willBeVisible= VisibleSet(nextIndex);
 
-        // Для плавного виїзду старої крайної: хто був видимим, але стане невидимим
-        var outgoing = new HashSet<RectTransform>(wasVisible);
+        var outgoing = new HashSet<RectTransform>(wasVisible);     // були видимі → стануть невидимі
         outgoing.ExceptWith(willBeVisible);
 
-        // Хто стане видимим, але був невидимим (потрібно активувати перед анімацією)
-        var incoming = new HashSet<RectTransform>(willBeVisible);
+        var incoming = new HashSet<RectTransform>(willBeVisible);  // стануть видимі → раніше були невидимі
         incoming.ExceptWith(wasVisible);
 
-        // Активуємо "incoming", щоб вони анімувалися з офскріну в слот
+        // --- PRE-POSITION для incoming ---
+        // Ставимо миттєво за межі видимого ряду: preOffset = ±(sideCount+1)
+        int preOffset = (dir > 0) ? (sideCount + 1) : -(sideCount + 1);
         foreach (var rt in incoming)
-            if (rt && !rt.gameObject.activeSelf) rt.gameObject.SetActive(true);
+        {
+            if (!rt) continue;
+            if (!rt.gameObject.activeSelf) rt.gameObject.SetActive(true);
 
-        // Твінимо ВСІ елементи, які або були видимими, або стануть видимими (щоб рух/поворот відпрацювали коректно)
+            Pose pre = ComputePose(preOffset);
+            rt.DOKill();
+            rt.localPosition = pre.pos;                      // миттєво
+            rt.localRotation = Quaternion.Euler(pre.euler);  // з правильним знаком кута
+            rt.localScale    = pre.scale;
+
+            if (dimNeighbours)
+            {
+                var cg = rt.GetComponent<CanvasGroup>() ?? rt.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = neighbourAlpha;                   // як у сусідів
+                cg.interactable = false;
+                cg.blocksRaycasts = false;
+            }
+        }
+
+        // Анімуємо всіх, хто був або стане видимим (щоб синхронно їхали)
         var toAnimate = new HashSet<RectTransform>(wasVisible);
         toAnimate.UnionWith(willBeVisible);
 
-        // Готуємо цілі для всіх
         foreach (var rt in toAnimate)
         {
             if (!rt) continue;
             int i = System.Array.IndexOf(cards, rt);
             if (i < 0) continue;
 
-            // Поточні й цільові офсети
-            float offPrev = CyclicOffset(i, prevIndex, n);
             float offNext = CyclicOffset(i, nextIndex, n);
-
-            // Старт (як є). Ціль:
             Pose nextPose = ComputePose(offNext);
 
-            // Kill, анімації позиції/скейлу/повороту до цілі
             rt.DOKill();
             rt.DOLocalMove(nextPose.pos, tweenDuration).SetEase(tweenEase);
             rt.DOScale(nextPose.scale, tweenDuration).SetEase(tweenEase);
             rt.DOLocalRotate(nextPose.euler, tweenDuration).SetEase(tweenEase);
 
-            // Опційно альфа/інтеракція
-            CanvasGroup cg = null;
             if (dimNeighbours)
             {
-                cg = rt.GetComponent<CanvasGroup>() ?? rt.gameObject.AddComponent<CanvasGroup>();
+                var cg = rt.GetComponent<CanvasGroup>() ?? rt.gameObject.AddComponent<CanvasGroup>();
                 float targetAlpha = Mathf.Abs(offNext) < 0.01f ? 1f : neighbourAlpha;
                 cg.DOFade(targetAlpha, tweenDuration).SetEase(tweenEase);
+                bool isCenter = Mathf.Abs(offNext) < 0.01f;
+                cg.interactable = isCenter;
+                cg.blocksRaycasts = isCenter;
             }
         }
 
-        // По завершенні: вимикаємо ті, що стали невидимими. Іншим — гарантуємо коректну «статичну» позу.
+        // Після твіну: вимкнути тих, хто став невидимим; зафіксувати позу видимих
         DOVirtual.DelayedCall(tweenDuration, () =>
         {
-            // Оновлюємо індекс
             currentIndex = nextIndex;
 
-            // Вимкнути аутгоїнг після доїзду
             foreach (var rt in outgoing)
             {
                 if (!rt) continue;
-                // остаточно ставимо їх у «позакадрову» статичну позу і вимикаємо
                 int i = System.Array.IndexOf(cards, rt);
-                if (i >= 0)
+                if (i < 0) continue;
+
+                float offNow = CyclicOffset(i, currentIndex, n);
+                if (Mathf.Abs(offNow) > sideCount + 0.001f)
                 {
-                    float offNow = CyclicOffset(i, currentIndex, n);
-                    if (Mathf.Abs(offNow) > sideCount + 0.001f)
-                    {
-                        Pose p = ComputePose(offNow);
-                        rt.localPosition = p.pos;
-                        rt.localRotation = Quaternion.Euler(p.euler);
-                        rt.localScale = p.scale;
-                        rt.gameObject.SetActive(false);
-                    }
+                    Pose p = ComputePose(offNow);
+                    rt.localPosition = p.pos;
+                    rt.localRotation = Quaternion.Euler(p.euler);
+                    rt.localScale    = p.scale;
+                    rt.gameObject.SetActive(false);
                 }
             }
 
-            // Для всіх, хто видимий зараз — зафіксувати «статичну» позу (Y=0 для центру, ±max для сусідів)
             foreach (var rt in willBeVisible)
             {
                 if (!rt) continue;
@@ -149,7 +153,7 @@ public class WorldSpaceCarouselManager : MonoBehaviour
                 Pose p = ComputePose(off);
                 rt.localPosition = p.pos;
                 rt.localRotation = Quaternion.Euler(p.euler);
-                rt.localScale = p.scale;
+                rt.localScale    = p.scale;
 
                 if (dimNeighbours)
                 {
@@ -174,7 +178,6 @@ public class WorldSpaceCarouselManager : MonoBehaviour
         public Vector3 scale;
     }
 
-    // Статична розкладка для старту (без твінів)
     private void LayoutStatic(int index)
     {
         int n = cards.Length;
@@ -193,8 +196,7 @@ public class WorldSpaceCarouselManager : MonoBehaviour
                 if (!rt.gameObject.activeSelf) rt.gameObject.SetActive(true);
                 rt.localPosition = p.pos;
                 rt.localRotation = Quaternion.Euler(p.euler);
-                rt.localScale = p.scale;
-
+                rt.localScale    = p.scale;
                 if (dimNeighbours)
                 {
                     var cg = rt.GetComponent<CanvasGroup>() ?? rt.gameObject.AddComponent<CanvasGroup>();
@@ -208,13 +210,12 @@ public class WorldSpaceCarouselManager : MonoBehaviour
             {
                 rt.localPosition = p.pos;
                 rt.localRotation = Quaternion.Euler(p.euler);
-                rt.localScale = p.scale;
+                rt.localScale    = p.scale;
                 if (rt.gameObject.activeSelf) rt.gameObject.SetActive(false);
             }
         }
     }
 
-    // Обчислює офсет у кільці (…,-2,-1,0,+1,+2,…)
     private float CyclicOffset(int i, int centerIndex, int n)
     {
         int raw = i - centerIndex;
@@ -223,29 +224,21 @@ public class WorldSpaceCarouselManager : MonoBehaviour
         return raw;
     }
 
-    // Цільова поза для заданого офсету:
-    // - позиція: X = off*spacing; Z = -|off|*depth
-    // - поворот: центр 0; лівий сусід -maxYRotation; правий сусід +maxYRotation.
-    //   (для |off|>1 значення не критичні; ставимо той самий знак ±max, аби не було стрибків)
+    // Поза для офсету:
+    // центр: rot Y = 0; ліві: -maxYRotation; праві: +maxYRotation
     private Pose ComputePose(float off)
     {
         Pose p;
-        p.pos = new Vector3(off * spacing, 0f, -Mathf.Abs(off) * depth);
-
-        if (Mathf.Abs(off) < 0.01f)
-            p.euler = Vector3.zero; // центр = 0
-        else
-            p.euler = new Vector3(0f, Mathf.Sign(off) * maxYRotation, 0f); // ліва = −max, права = +max
-
+        p.pos   = new Vector3(off * spacing, 0f, -Mathf.Abs(off) * depth);
+        p.euler = (Mathf.Abs(off) < 0.01f) ? Vector3.zero
+                                           : new Vector3(0f, Mathf.Sign(off) * maxYRotation, 0f);
         if (dimNeighbours && Mathf.Abs(off) > 0.01f && Mathf.Abs(off) <= sideCount + 0.001f)
             p.scale = Vector3.one * neighbourScale;
         else
             p.scale = Vector3.one;
-
         return p;
     }
 
-    // Повертає список видимих при даному центрі
     private List<RectTransform> VisibleSet(int center)
     {
         var list = new List<RectTransform>();
@@ -255,7 +248,8 @@ public class WorldSpaceCarouselManager : MonoBehaviour
             var rt = cards[i];
             if (!rt) continue;
             float off = CyclicOffset(i, center, n);
-            if (Mathf.Abs(off) <= sideCount + 0.001f) list.Add(rt);
+            if (Mathf.Abs(off) <= sideCount + 0.001f)
+                list.Add(rt);
         }
         return list;
     }
