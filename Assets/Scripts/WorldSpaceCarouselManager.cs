@@ -7,6 +7,9 @@ public class WorldSpaceCarouselManager : MonoBehaviour
     [Header("Cards")]
     public RectTransform[] cards;
 
+    [Header("Vertical offset")]
+    public float yOffset = -150f;
+
     [Header("Layout")]
     public float spacing = 1.65f;     // X-відстань між слотами (world units)
     public float depth = 0.84f;       // Z-відступ для нецентрових
@@ -229,13 +232,17 @@ public class WorldSpaceCarouselManager : MonoBehaviour
     private Pose ComputePose(float off)
     {
         Pose p;
-        p.pos   = new Vector3(off * spacing, 0f, -Mathf.Abs(off) * depth);
-        p.euler = (Mathf.Abs(off) < 0.01f) ? Vector3.zero
-                                           : new Vector3(0f, Mathf.Sign(off) * maxYRotation, 0f);
+        // X = відстань, Y = yOffset, Z = depth
+        p.pos   = new Vector3(off * spacing, yOffset, -Mathf.Abs(off) * depth);
+        p.euler = (Mathf.Abs(off) < 0.01f)
+                    ? Vector3.zero
+                    : new Vector3(0f, Mathf.Sign(off) * maxYRotation, 0f);
+
         if (dimNeighbours && Mathf.Abs(off) > 0.01f && Mathf.Abs(off) <= sideCount + 0.001f)
             p.scale = Vector3.one * neighbourScale;
         else
             p.scale = Vector3.one;
+
         return p;
     }
 
