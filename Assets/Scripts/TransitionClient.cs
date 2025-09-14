@@ -1,6 +1,8 @@
 using UnityEngine;
+using UnityEngine.UI;
 using DG.Tweening;
 
+[RequireComponent(typeof(Button))]
 public class TransitionClient : MonoBehaviour
 {
     [Header("References")]
@@ -19,19 +21,30 @@ public class TransitionClient : MonoBehaviour
     [SerializeField] private Ease customEaseIn = Ease.OutCubic;
     [SerializeField] private Ease customEaseOut = Ease.OutCubic;
 
-    void Reset()
-    {
-        // Автопошук менеджера у сцені
-        if (manager == null) manager = FindObjectOfType<TransitionManager>();
-    }
+    private Button _button;
 
     void Awake()
     {
         if (manager == null) manager = FindObjectOfType<TransitionManager>();
+        _button = GetComponent<Button>();
+        if (_button != null)
+        {
+            // передплачуємось на OnClick у момент Awake
+            _button.onClick.AddListener(Trigger);
+        }
+    }
+
+    void OnDestroy()
+    {
+        // не забуваємо відписатися
+        if (_button != null)
+        {
+            _button.onClick.RemoveListener(Trigger);
+        }
     }
 
     /// <summary>
-    /// Викликати цей метод із UI Button (OnClick) або з іншого скрипта.
+    /// Викликається при натисканні кнопки (підписка в Awake)
     /// </summary>
     public void Trigger()
     {
@@ -55,7 +68,7 @@ public class TransitionClient : MonoBehaviour
         }
     }
 
-    // На випадок якщо хочеш викликати в коді напряму з параметрами:
+    // Якщо треба викликати з іншого коду
     public void TriggerWith(RectTransform target, SlideDirection dir)
     {
         targetScreen = target;
