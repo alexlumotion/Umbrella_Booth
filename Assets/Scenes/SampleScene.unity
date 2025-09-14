@@ -1210,6 +1210,7 @@ MonoBehaviour:
   fadeEase: 9
   videoPlayer: {fileID: 142303284}
   transitionClient: {fileID: 1429241265}
+  videoPreRollPlayer: {fileID: 142303285}
   updateFrame: 0
 --- !u!328 &142303284
 VideoPlayer:
@@ -2582,7 +2583,7 @@ MonoBehaviour:
   m_Content: {fileID: 1925663135}
   m_Horizontal: 0
   m_Vertical: 1
-  m_MovementType: 1
+  m_MovementType: 2
   m_Elasticity: 0.1
   m_Inertia: 1
   m_DecelerationRate: 0.135
