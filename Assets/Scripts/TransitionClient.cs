@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 using DG.Tweening;
 
 [RequireComponent(typeof(Button))]
@@ -13,7 +14,6 @@ public class TransitionClient : MonoBehaviour
     [SerializeField] private SlideDirection direction = SlideDirection.Left;
 
     [Header("Optional Overrides")]
-    [Tooltip("Якщо вимкнено — будуть використані дефолтні налаштування менеджера.")]
     [SerializeField] private bool overrideDuration = false;
     [SerializeField] private float customDuration = 0.45f;
 
@@ -21,58 +21,59 @@ public class TransitionClient : MonoBehaviour
     [SerializeField] private Ease customEaseIn = Ease.OutCubic;
     [SerializeField] private Ease customEaseOut = Ease.OutCubic;
 
+    [Header("Callbacks")]
+    [Tooltip("Викликається, коли анімація переходу завершена (саме для цього клієнта)")]
+    public UnityEvent onTransitionComplete;
+
     private Button _button;
 
     void Awake()
     {
-        if (manager == null) manager = FindObjectOfType<TransitionManager>();
+        if (!manager) manager = FindObjectOfType<TransitionManager>();
         _button = GetComponent<Button>();
-        if (_button != null)
-        {
-            // передплачуємось на OnClick у момент Awake
-            _button.onClick.AddListener(Trigger);
-        }
+        if (_button) _button.onClick.AddListener(Trigger);
     }
 
     void OnDestroy()
     {
-        // не забуваємо відписатися
-        if (_button != null)
-        {
-            _button.onClick.RemoveListener(Trigger);
-        }
+        if (_button) _button.onClick.RemoveListener(Trigger);
     }
 
-    /// <summary>
-    /// Викликається при натисканні кнопки (підписка в Awake)
-    /// </summary>
     public void Trigger()
     {
-        if (manager == null || targetScreen == null) return;
+        if (!manager || !targetScreen) return;
+
+        UnityAction done = () =>
+        {
+            // локальний інспекторний колбек клієнта
+            onTransitionComplete?.Invoke();
+        };
 
         if (overrideDuration && overrideEase)
         {
-            manager.Show(targetScreen, direction, customEaseIn, customEaseOut, customDuration);
+            manager.Show(targetScreen, direction, customEaseIn, customEaseOut, customDuration, done);
         }
         else if (overrideDuration)
         {
-            manager.Show(targetScreen, direction, null, null, customDuration);
+            manager.Show(targetScreen, direction, null, null, customDuration, done);
         }
         else if (overrideEase)
         {
-            manager.Show(targetScreen, direction, customEaseIn, customEaseOut, null);
+            manager.Show(targetScreen, direction, customEaseIn, customEaseOut, null, done);
         }
         else
         {
-            manager.Show(targetScreen, direction);
+            manager.Show(targetScreen, direction, null, null, null, done);
         }
     }
 
-    // Якщо треба викликати з іншого коду
-    public void TriggerWith(RectTransform target, SlideDirection dir)
+    // Альтернативний виклик із коду
+    public void TriggerWith(RectTransform target, SlideDirection dir, UnityAction onDone = null)
     {
         targetScreen = target;
         direction = dir;
+        if (onDone != null) onTransitionComplete.AddListener(onDone);
         Trigger();
+        if (onDone != null) onTransitionComplete.RemoveListener(onDone);
     }
 }
