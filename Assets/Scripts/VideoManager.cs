@@ -45,6 +45,9 @@ public class VideoManager : MonoBehaviour
             imgPDF.sprite = ch.spritePDF;
             imgBeforeQR.sprite = ch.spriteBeforeQR;
             imgQR.sprite = ch.spriteQR;
+
+            imgPDF.rectTransform.anchoredPosition = Vector2.zero;
+
         };
 
     }
