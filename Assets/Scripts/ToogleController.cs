@@ -79,10 +79,46 @@ public class ToogleController : MonoBehaviour
             Debug.Log("Сценарій 6");
             imageAnswer.sprite = spritesAnswers[5];
         }
+        else if (name1 == "A" &&
+                 name2 == "A" &&
+                 name3 == "A" &&
+                 name4 == "A" &&
+                 name5 == "A")
+        {
+            Debug.Log("Сценарій 7");
+            imageAnswer.sprite = spritesAnswers[6];
+        }
+        else if (name1 == "B" &&
+                 name2 == "B" &&
+                 name3 == "B" &&
+                 name4 == "B" &&
+                 name5 == "B")
+        {
+            Debug.Log("Сценарій 8");
+            imageAnswer.sprite = spritesAnswers[7];
+        }
+        else if (name1 == "C" &&
+                 name2 == "C" &&
+                 name3 == "C" &&
+                 name4 == "C" &&
+                 name5 == "C")
+        {
+            Debug.Log("Сценарій 9");
+            imageAnswer.sprite = spritesAnswers[8];
+        }
+        else if (name1 == "D" &&
+                 name2 == "D" &&
+                 name3 == "D" &&
+                 name4 == "D" &&
+                 name5 == "D")
+        {
+            Debug.Log("Сценарій 10");
+            imageAnswer.sprite = spritesAnswers[9];
+        }
         else
         {
             Debug.Log("Жоден сценарій не збігся");
-            imageAnswer.sprite = spritesAnswers[0];
+            imageAnswer.sprite = spritesAnswers[Random.Range(0, 10)];
         }
 
         csvLogManager.Log(name1, name2, name3, name4, name5);
