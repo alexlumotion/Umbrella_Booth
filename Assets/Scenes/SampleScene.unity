@@ -189,6 +189,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cards:
+  - {fileID: 338419925}
   - {fileID: 855431125}
   - {fileID: 1282346833}
   - {fileID: 258050384}
@@ -198,7 +199,6 @@ MonoBehaviour:
   - {fileID: 1010127419}
   - {fileID: 1377461212}
   - {fileID: 637195626}
-  - {fileID: 338419925}
   - {fileID: 1997748825}
   - {fileID: 79586601}
   - {fileID: 1822146432}
@@ -1201,7 +1201,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clip: {fileID: 32900000, guid: 9139bb5deb38b42f68f8df6cd4871204, type: 3}
-  spritePDF: {fileID: 21300000, guid: c00a536160d684cd1aaa58dac20a9202, type: 3}
+  spritePDF: {fileID: 21300000, guid: df23c5fbb22b74945954ca9328e73c09, type: 3}
   spriteBeforeQR: {fileID: 21300000, guid: fcca55d34f363429eb11036584940fee, type: 3}
   spriteQR: {fileID: 21300000, guid: 73e91cbc829784407a830d632fcff5a7, type: 3}
 --- !u!114 &74574379
@@ -1520,7 +1520,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clip: {fileID: 32900000, guid: df962d6d63cf64dcc82af1f3e8e0301d, type: 3}
-  spritePDF: {fileID: 21300000, guid: 0a32877d001c64256baa3b02639e41c6, type: 3}
+  spritePDF: {fileID: 21300000, guid: 150db88eb63d443a79ebb10d94fd7508, type: 3}
   spriteBeforeQR: {fileID: 21300000, guid: 54e3c74991e0a40328b648c0996bb5bd, type: 3}
   spriteQR: {fileID: 21300000, guid: 48c5746010d77482f953984f04a6cadc, type: 3}
 --- !u!114 &79586605
@@ -1851,7 +1851,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clip: {fileID: 32900000, guid: 4afd5ea324a524e06b4f51a83c848927, type: 3}
-  spritePDF: {fileID: 21300000, guid: 6e223cff8e777473f81b1aca0dc39e8c, type: 3}
+  spritePDF: {fileID: 21300000, guid: cf9eeae87251b4387ad2b807f830b39d, type: 3}
   spriteBeforeQR: {fileID: 21300000, guid: 2e6575778c42c47e7b1c435a0073346e, type: 3}
   spriteQR: {fileID: 21300000, guid: 98f137ac2611c467cb6bdf4e61eab649, type: 3}
 --- !u!114 &99894733
@@ -2589,7 +2589,7 @@ VideoPlayer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 142303281}
   m_Enabled: 1
-  m_VideoClip: {fileID: 32900000, guid: 996261820ec864b5ab41bab2c39b2537, type: 3}
+  m_VideoClip: {fileID: 32900000, guid: 1bbf3493ca8b44559a26fae616af987c, type: 3}
   m_TargetCameraAlpha: 1
   m_TargetCamera3DLayout: 0
   m_TargetCamera: {fileID: 519420031}
@@ -3809,7 +3809,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clip: {fileID: 32900000, guid: f39655106c19a4f04906113ba140da83, type: 3}
-  spritePDF: {fileID: 21300000, guid: a5c1ab5432f9d44b2a2db4834b3b8d18, type: 3}
+  spritePDF: {fileID: 21300000, guid: a0624062a19e2440b949db8a9c308549, type: 3}
   spriteBeforeQR: {fileID: 21300000, guid: ec32ea331bfc24a70ab2971a70ed22ce, type: 3}
   spriteQR: {fileID: 21300000, guid: 1759c7774174746a691e16512122dfff, type: 3}
 --- !u!114 &251807197
@@ -4104,7 +4104,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clip: {fileID: 32900000, guid: 0a416d56a9aba4bccbfd6333cba3ddce, type: 3}
-  spritePDF: {fileID: 21300000, guid: 224726827738147c0b525b7105486931, type: 3}
+  spritePDF: {fileID: 21300000, guid: 0b148f053c9cf455ba296edd5729d08d, type: 3}
   spriteBeforeQR: {fileID: 21300000, guid: 6f7a5aa143b414ac79b244e117e25dbc, type: 3}
   spriteQR: {fileID: 21300000, guid: 6c24ec8305f514d839c34f78011f05f8, type: 3}
 --- !u!114 &258050388
@@ -5069,7 +5069,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clip: {fileID: 32900000, guid: 996261820ec864b5ab41bab2c39b2537, type: 3}
-  spritePDF: {fileID: 21300000, guid: c80e056dd4fad4424a56439ac369a996, type: 3}
+  spritePDF: {fileID: 21300000, guid: 8ba8c3091110d411fb627a3e47b7cfc2, type: 3}
   spriteBeforeQR: {fileID: 21300000, guid: f876a0131ed224f4bbe9ab07f200076e, type: 3}
   spriteQR: {fileID: 21300000, guid: 41b0992ef975e4b70904e4f582c36f6d, type: 3}
 --- !u!114 &338419929
@@ -8289,7 +8289,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clip: {fileID: 32900000, guid: 0ad0f7eabfd034d0ba0a37db564464f7, type: 3}
-  spritePDF: {fileID: 21300000, guid: 125ac34e4ca404a9ab7644f1196ba651, type: 3}
+  spritePDF: {fileID: 21300000, guid: c09c7bf3ca89f497dab3054b460a8d29, type: 3}
   spriteBeforeQR: {fileID: 21300000, guid: bbfc0894c55074d2bb70ad081184daa8, type: 3}
   spriteQR: {fileID: 21300000, guid: ba40d79fffe414dc590594cf31af46f7, type: 3}
 --- !u!114 &569753655
@@ -8728,7 +8728,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.44313726, g: 0.37254903, b: 0.84705883, a: 1}
+  m_Color: {r: 0.47058824, g: 0.3764706, b: 0.8627451, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -9723,7 +9723,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clip: {fileID: 32900000, guid: 56fc11c09197b4c77af75796fa5df15c, type: 3}
-  spritePDF: {fileID: 21300000, guid: 4b7f68b30ee3c4ffebd2f3341b41b2c8, type: 3}
+  spritePDF: {fileID: 21300000, guid: 6a2d878c162064c2c8604f5fc8742c34, type: 3}
   spriteBeforeQR: {fileID: 21300000, guid: 046fa4b3e20aa4ef281e924d138402d3, type: 3}
   spriteQR: {fileID: 21300000, guid: cae33de59057c4e21a8c44d5f77b6a9d, type: 3}
 --- !u!114 &637195630
@@ -13221,7 +13221,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clip: {fileID: 32900000, guid: 1bbf3493ca8b44559a26fae616af987c, type: 3}
-  spritePDF: {fileID: 21300000, guid: 6add50a66f7114dfcb6458c3bb4399bc, type: 3}
+  spritePDF: {fileID: 21300000, guid: 83a0dbfb12cc14cf88a3ededc85eda71, type: 3}
   spriteBeforeQR: {fileID: 21300000, guid: 87bdc1522e8f8453bb734f851265e713, type: 3}
   spriteQR: {fileID: 21300000, guid: 0c66595e1111f4000b8d996cccfc91ac, type: 3}
 --- !u!114 &855431129
@@ -14296,7 +14296,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clip: {fileID: 32900000, guid: 6e0f2156650b6449aae2ae9d8cfdc8de, type: 3}
-  spritePDF: {fileID: 21300000, guid: f40e6541629314500b231b2e110484e4, type: 3}
+  spritePDF: {fileID: 21300000, guid: b47db75a075c3409cac9f9597538ec77, type: 3}
   spriteBeforeQR: {fileID: 21300000, guid: ecd827b814ce440e6a6dadd1459151a4, type: 3}
   spriteQR: {fileID: 21300000, guid: bb99c78559bda42f69d46568ce76c9e1, type: 3}
 --- !u!114 &932965091
@@ -14980,7 +14980,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clip: {fileID: 32900000, guid: 047451a88720e4d32941d57857b67256, type: 3}
-  spritePDF: {fileID: 21300000, guid: 0171f2464a187467f91475488c62a5b7, type: 3}
+  spritePDF: {fileID: 21300000, guid: c16dedc7cabbb495094503fbe24d59f1, type: 3}
   spriteBeforeQR: {fileID: 21300000, guid: 9a2613e23e43f4dafb7e608e422a049b, type: 3}
   spriteQR: {fileID: 21300000, guid: 25d7a19f8162c4be0b3e31663d747a73, type: 3}
 --- !u!114 &1010127423
@@ -17661,7 +17661,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clip: {fileID: 32900000, guid: a6ec7a4b49b71498fb10107c44828e8a, type: 3}
-  spritePDF: {fileID: 21300000, guid: 47574662eb3214f8489ad00f1c4100a6, type: 3}
+  spritePDF: {fileID: 21300000, guid: 82856c4f621374a80aaeab273ba249f0, type: 3}
   spriteBeforeQR: {fileID: 21300000, guid: 94bbf4566fce9406b8e7aaff0a21a32d, type: 3}
   spriteQR: {fileID: 21300000, guid: 3f34b81ad6726408c9f3007db0d4d381, type: 3}
 --- !u!114 &1282346837
@@ -19362,7 +19362,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clip: {fileID: 32900000, guid: 14c2fbf462e14494cab26ce165bdd522, type: 3}
-  spritePDF: {fileID: 21300000, guid: 991bce20b2a5d418686a0d6e5f5d5688, type: 3}
+  spritePDF: {fileID: 21300000, guid: c854d1d0bf1954e3aa21d2247c5a2dee, type: 3}
   spriteBeforeQR: {fileID: 21300000, guid: a8a445dbe846440cfb0d532c5abda197, type: 3}
   spriteQR: {fileID: 21300000, guid: 6845a4438d3064e3883c022724d020d3, type: 3}
 --- !u!114 &1377461216
@@ -22879,7 +22879,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clip: {fileID: 32900000, guid: c56c28eb8eed746f68e8a50fc6f22e5f, type: 3}
-  spritePDF: {fileID: 21300000, guid: ba6d31714a0164923801b645076c2c69, type: 3}
+  spritePDF: {fileID: 21300000, guid: eb447b0ba1a5e463a887bc0f7e0f89c7, type: 3}
   spriteBeforeQR: {fileID: 21300000, guid: 231cb18c2421b4485ad0f6e7c24b10f2, type: 3}
   spriteQR: {fileID: 21300000, guid: 77f8eac5a6e4842ddb2b12f7149964f9, type: 3}
 --- !u!114 &1675626342
@@ -25004,7 +25004,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clip: {fileID: 32900000, guid: a3e814f1af09a4022990fbbd15634141, type: 3}
-  spritePDF: {fileID: 21300000, guid: 214068466c19a412194d44df43f565f1, type: 3}
+  spritePDF: {fileID: 21300000, guid: 150611c39ac134b068e6dff4f7a2cb1e, type: 3}
   spriteBeforeQR: {fileID: 21300000, guid: f9418d4eb3c044268b205b81dfd7704d, type: 3}
   spriteQR: {fileID: 21300000, guid: 5d0d9ffbf5667494581262195c7ab683, type: 3}
 --- !u!114 &1822146436
@@ -26643,7 +26643,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: c80e056dd4fad4424a56439ac369a996, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 8ba8c3091110d411fb627a3e47b7cfc2, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -28419,7 +28419,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clip: {fileID: 32900000, guid: f2fee4bdb01e948579fdd743549a13f3, type: 3}
-  spritePDF: {fileID: 21300000, guid: 6304355407f8348d7b80cac30fab903b, type: 3}
+  spritePDF: {fileID: 21300000, guid: 2e5151227758f49af96a13d21e361b40, type: 3}
   spriteBeforeQR: {fileID: 21300000, guid: 46f7ddadad3674172a2b158ab517b9db, type: 3}
   spriteQR: {fileID: 21300000, guid: 3e9079114d9fd42e0b730eed19062e68, type: 3}
 --- !u!114 &1997748829
@@ -28569,7 +28569,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clip: {fileID: 32900000, guid: 6a3924989f1a44e91815e43848285913, type: 3}
-  spritePDF: {fileID: 21300000, guid: 61f01f920ad244aa4bc2bbd3129c3670, type: 3}
+  spritePDF: {fileID: 21300000, guid: 540bab8d347ee497bb2b60044f6a127e, type: 3}
   spriteBeforeQR: {fileID: 21300000, guid: 17b4e4edccfa0454d9d681236afe0446, type: 3}
   spriteQR: {fileID: 21300000, guid: 8c28bc30ba9c54b8fb30e0078b79ee93, type: 3}
 --- !u!114 &2010327085
@@ -30826,7 +30826,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clip: {fileID: 32900000, guid: d1bfc661695d14ef4a8614d0096cb499, type: 3}
-  spritePDF: {fileID: 21300000, guid: d13921d35ec7a4a06a8e594687dd27ab, type: 3}
+  spritePDF: {fileID: 21300000, guid: fa6a20f7549e54f9b9d0a14452321941, type: 3}
   spriteBeforeQR: {fileID: 21300000, guid: e716b3c0eed624fc1a477d704f0d7bfe, type: 3}
   spriteQR: {fileID: 21300000, guid: 811342e1e12964c3091f199b9edb9114, type: 3}
 --- !u!114 &2119279099
