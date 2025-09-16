@@ -2,34 +2,36 @@ using UnityEngine;
 
 public class FullscreenResolution : MonoBehaviour
 {
-    [Header("Бажана роздільна здатність")]
+    [Header("Бажана роздільна здатність (портрет)")]
     public int width = 1080;
     public int height = 1920;
+    public int refreshRate = 60;
 
-    [Header("Фулскрін режим")]
-    public FullScreenMode mode = FullScreenMode.FullScreenWindow;
+    [Header("Камера, яка має рендерити на другий дисплей")]
+    public Camera targetCamera; // якщо пусто — візьме Camera.main
 
-    [Header("Який дисплей (0 = перший, 1 = другий...)")]
-    public int targetDisplayIndex = 1; // другий екран
+    [Header("Режим фулскріна")]
+    public FullScreenMode mode = FullScreenMode.FullScreenWindow; // безрамковий фулскрін
 
     void Start()
     {
+        if (targetCamera == null) targetCamera = Camera.main;
+
 #if !UNITY_EDITOR
-        // якщо кілька дисплеїв – активуємо другий
-        if (Display.displays.Length > targetDisplayIndex)
-        {
-            Display.displays[targetDisplayIndex].Activate();
-        }
+        // 1) встановлюємо фулскрін + роздільну
+        Screen.fullScreenMode = mode;
+        Screen.SetResolution(width, height, true);
 
-        // новий API Unity 2021+ — переносимо головне вікно на обраний дисплей
-        if (Screen.mainWindowDisplayInfo.displayIndex != targetDisplayIndex)
+        // 2) якщо є другий дисплей — активуємо та рендеримо туди
+        if (Display.displays.Length > 1)
         {
-            var info = Display.displays[targetDisplayIndex].displayInfo;
-            Screen.MoveMainWindowTo(info, Vector2Int.zero); // переміщаємо у 0,0 на другому дисплеї
-        }
+            // активуємо другий дисплей з потрібною роздільною (якщо ОС дозволяє)
+            Display.displays[1].Activate(width, height, refreshRate);
 
-        // встановлюємо роздільну здатність + фулскрін
-        Screen.SetResolution(width, height, mode);
+            // направляємо камеру на Display 2 (індекс 1)
+            if (targetCamera != null)
+                targetCamera.targetDisplay = 1;
+        }
 #endif
     }
 }
