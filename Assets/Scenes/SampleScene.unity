@@ -3474,6 +3474,7 @@ GameObject:
   - component: {fileID: 239396547}
   - component: {fileID: 239396546}
   - component: {fileID: 239396549}
+  - component: {fileID: 239396550}
   m_Layer: 5
   m_Name: Button (1)
   m_TagString: Untagged
@@ -3520,7 +3521,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 0
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
@@ -3558,15 +3559,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.39215687}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: 47997da72c2a24f39a2832831905ee8d, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -3606,6 +3607,42 @@ MonoBehaviour:
   onTransitionComplete:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &239396550
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 239396543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82b597565aa9440cd9b55f493ad52633, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 239396544}
+  bg: {fileID: 239396547}
+  label: {fileID: 0}
+  enableHoverScale: 1
+  hoverScale: 1.05
+  hoverDuration: 0.15
+  hoverEase: 6
+  enablePressBounce: 1
+  pressScale: 0.94
+  pressInDuration: 0.08
+  releaseDuration: 0.18
+  pressInEase: 6
+  releaseEase: 27
+  enableTint: 1
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  hoverColor: {r: 1, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0.95, g: 0.95, b: 0.95, a: 1}
+  tintDuration: 0.12
+  enableRipple: 0
+  ripplePrefab: {fileID: 0}
+  rippleDuration: 0.35
+  rippleStartScale: 0.4
+  rippleEndScale: 1.4
+  rippleStartAlpha: 0.25
 --- !u!1 &241387474
 GameObject:
   m_ObjectHideFlags: 0
@@ -11985,7 +12022,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 3e62dd523cd9f4a0ba295b9345a836ac, type: 3}
+  m_Sprite: {fileID: 21300000, guid: fed7d1d80ce144e87afb5d3b216620e5, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -20253,7 +20290,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1473965552
 RectTransform:
   m_ObjectHideFlags: 0
@@ -22122,6 +22159,7 @@ GameObject:
   - component: {fileID: 1624588241}
   - component: {fileID: 1624588240}
   - component: {fileID: 1624588239}
+  - component: {fileID: 1624588244}
   m_Layer: 5
   m_Name: Button (2)
   m_TagString: Untagged
@@ -22214,7 +22252,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 0
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
@@ -22252,15 +22290,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.39215687}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: 9c592c2f29a054d4f82463e97a29a609, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -22277,6 +22315,42 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1624588237}
   m_CullTransparentMesh: 1
+--- !u!114 &1624588244
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1624588237}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82b597565aa9440cd9b55f493ad52633, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 1624588238}
+  bg: {fileID: 1624588242}
+  label: {fileID: 0}
+  enableHoverScale: 1
+  hoverScale: 1.05
+  hoverDuration: 0.15
+  hoverEase: 6
+  enablePressBounce: 1
+  pressScale: 0.94
+  pressInDuration: 0.08
+  releaseDuration: 0.18
+  pressInEase: 6
+  releaseEase: 27
+  enableTint: 1
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  hoverColor: {r: 1, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0.95, g: 0.95, b: 0.95, a: 1}
+  tintDuration: 0.12
+  enableRipple: 0
+  ripplePrefab: {fileID: 0}
+  rippleDuration: 0.35
+  rippleStartScale: 0.4
+  rippleEndScale: 1.4
+  rippleStartAlpha: 0.25
 --- !u!1 &1633855501
 GameObject:
   m_ObjectHideFlags: 0
