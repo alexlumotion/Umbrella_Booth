@@ -8,15 +8,27 @@ public class FullscreenResolution : MonoBehaviour
 
     [Header("Фулскрін режим")]
     public FullScreenMode mode = FullScreenMode.FullScreenWindow;
-    // Альтернативи:
-    // FullScreenMode.ExclusiveFullScreen – класичний ексклюзивний фулскрін
-    // FullScreenMode.FullScreenWindow – безрамковий фулскрін (рекомендується)
-    // FullScreenMode.Windowed – звичайне вікно
+
+    [Header("Який дисплей (0 = перший, 1 = другий...)")]
+    public int targetDisplayIndex = 1; // другий екран
 
     void Start()
     {
 #if !UNITY_EDITOR
-        // тільки у білді
+        // якщо кілька дисплеїв – активуємо другий
+        if (Display.displays.Length > targetDisplayIndex)
+        {
+            Display.displays[targetDisplayIndex].Activate();
+        }
+
+        // новий API Unity 2021+ — переносимо головне вікно на обраний дисплей
+        if (Screen.mainWindowDisplayInfo.displayIndex != targetDisplayIndex)
+        {
+            var info = Display.displays[targetDisplayIndex].displayInfo;
+            Screen.MoveMainWindowTo(info, Vector2Int.zero); // переміщаємо у 0,0 на другому дисплеї
+        }
+
+        // встановлюємо роздільну здатність + фулскрін
         Screen.SetResolution(width, height, mode);
 #endif
     }
