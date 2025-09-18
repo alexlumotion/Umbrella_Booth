@@ -21,7 +21,7 @@ public class CarouselButtonClient : MonoBehaviour
         if (_button != null) _button.onClick.RemoveListener(OnClick);
     }
 
-    void OnClick()
+    public void OnClick()
     {
         if (manager == null) return;
         if (next) manager.ShowNext(); else manager.ShowPrev();
